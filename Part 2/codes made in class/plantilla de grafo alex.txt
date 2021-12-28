@@ -1,0 +1,142 @@
+#include <iostream>
+#include <list>
+#include <deque>
+using namespace std;
+
+/*template<class N, class E>
+struct CNode;
+template<class N, class E>
+struct CEdge{
+	CNode<N,E>* n;
+};
+template<class N, class E>
+struct CNode{
+	CEdge<N,E>* e;
+};
+template<class N, class E>
+struct CGraph{};*/
+
+template<class G>
+struct CNode{
+
+    typedef typename G::Edge Edge;
+    typedef typename G::N N;
+
+    N value;
+    list<Edge*> edges; //lista de punteros a listas
+};
+
+template<class G>
+struct CEdge{
+    typedef typename G::Node Node;
+    typedef typename G::E E;
+
+    E value;
+    Node *nodes[2];
+    bool dir;  // 0 -> bidireccional, 1 -> [0] -> [1]
+};
+
+template<class _N, class _E>
+class CGraph{
+public:
+    typedef CGraph<_N, _E> G;
+    typedef CNode<G> Node;
+    typedef CEdge<G> Edge;
+    typedef _N 			N;
+    typedef _E 			E;
+    CGraph();
+    ~CGraph();
+    
+    bool insNode(N n); //inserar un nodo
+    bool insEdge(Node *a, Node *b, E e, bool d); //puntero a nodo a y b, arista a insertar, direccion
+    bool remEdge(Node *a, Node *b, E e); //puntero a nodo a y b, arista a borrar
+    bool remNode(N n); //borrar un nodo
+
+    deque<Node*> nodes; //array de punteros a nodo
+};
+
+template<class _N, class _E>
+CGraph<_N, _E>::CGraph()
+{
+
+}
+template<class _N, class _E>
+CGraph<_N, _E>::~CGraph()
+{
+
+}
+template<class _N, class _E>
+bool CGraph<_N, _E>::insNode(N n)
+{
+
+}
+template<class _N, class _E>
+bool CGraph<_N, _E>::insEdge(Node *a, Node *b, E e, bool d)
+{
+
+}
+template<class _N, class _E>
+bool CGraph<_N, _E>::remEdge(Node *a, Node *b, E e)
+{
+
+}
+template<class _N, class _E>
+bool CGraph<_N, _E>::remNode(N n)
+{
+
+}
+
+struct Coord{
+    float x, y;
+};
+
+class CGraphCity : public CGraph<Coord, int>{// clase para grafo con coordenadas como nodos
+    //aloritmos optimizados basados en coordenadas
+
+    /*
+    - implementar algoritmo de busquedas direccionadas
+    - implementar algoritmo de precalculo
+    */
+};
+
+class CGraphChar : public CGraph<char, int>{ //clase para grafo con caracteres como nodos
+    //aloritmos nooptimizados
+    void print();
+    /*
+    - implementar dikjstra y kruskal
+    */
+
+};
+
+int main(){
+    CGraphChar g1;
+    CGraphChar g2;
+}
+
+/*
+
+video 1: https://youtu.be/yfM2cEE8CGI?list=PLMQAk3MNIqsWIyu065y39fKGEen0TjHDF
+1h con 17segundos empieza a explicar un grafo con coordenadas
+
+video 2: https://youtu.be/q65S10tFJJ0?list=PLMQAk3MNIqsWIyu065y39fKGEen0TjHDF
+minuto 3:58,
+en el minuto 32:53 hasta 38:16 se explica el algoritmo de busqueda direccionada o aporximacion
+en el minuto 39:17 se explica el algoritmo de precalculo
+
+video 3: https://youtu.be/v66k9xJpKo4?list=PLMQAk3MNIqsWIyu065y39fKGEen0TjHDF
+implementacion del la base del todo el codigo
+
+video en el minuto 59:00
+un grafo que:
+-de A se va con 5 a B y con 3 se va a C
+-de B se va con 1 a c y con 2 se va a D
+-de C se va con 7 a d
+-D no tiene salida con nadie
+
+deberia de imprimir de la siguiente manera:
+
+A->5B->3C
+B->1C->2D
+C->7D
+D
+*/

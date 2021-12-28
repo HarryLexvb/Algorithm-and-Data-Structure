@@ -1,0 +1,53 @@
+/*
+
+    lista generara de forma aleatoria en base a la cantidad de jugadores:
+    ejemplo, numero de jugadores: 6
+    lista: 
+    A -> B -> C -> E -> F -> G
+
+    la papa empieza en A
+    se genera N aleatoriamente: N = 4
+    la papa avanza 4 posiciones
+    notamos que F esta en la posicion 4 entonces sale del juego (muere)    
+    A -> B -> C -> E -> G
+    la papa no puede quedar en el aire asi que pasa al sigueinte, en este caso G
+
+    ahora la papa empieza en G 
+    la lista ahora tiene 5 elementos  
+    se genera N aleatoriamente: N = 2
+    la papa avanza 2 posiciones
+    notamos que B esta en la posicion 2 entonces sale del juego (muere)
+    A -> C -> E -> G
+    la papa no puede quedar en el aire asi que pasa al sigueinte, en este caso C
+
+    ahora la papa empieza en C
+    la lista ahora tiene 4 elementos  
+    se genera N aleatoriamente: N = 3
+    la papa avanza 3 posiciones
+    notamos que A esta en la posicion 3 entonces sale del juego (muere)
+    C -> E -> G
+    la papa no puede quedar en el aire asi que pasa al sigueinte, en este caso C
+
+    ahora la papa empieza en C
+    la lista ahora tiene 3 elementos  
+    se genera N aleatoriamente: N = 8
+    la papa avanza 8 posiciones
+    notamos que G esta en la posicion 8 entonces sale del juego (muere)
+    C -> E 
+    la papa no puede quedar en el aire asi que pasa al sigueinte, en este caso C
+
+    ahora la papa empieza en C
+    la lista ahora tiene 2 elementos  
+    se genera N aleatoriamente: N = 5
+    la papa avanza 5 posiciones
+    notamos que C esta en la posicion 5 entonces sale del juego (muere)
+    C 
+    la papa no puede quedar en el aire asi que pasa al sigueinte, en este caso C
+
+    ahora la papa empieza en C
+    la lista ahora tiene 1 elemento 
+    se genera N aleatoriamente: N = 7
+    la papa avanza 7 posiciones 
+    al trata de ser el unico elemento entonces saltara en si mismo 
+    eliminandose asi por defecto y quedando la lista vacia e imprimir al final  NULL 
+*/

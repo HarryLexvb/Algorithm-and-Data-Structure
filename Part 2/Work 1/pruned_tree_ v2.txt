@@ -1,0 +1,396 @@
+//avl de massa y revisa el Print se ve genial 
+#include <iostream>
+#include <queue>
+#include <sstream>
+#include <math.h>
+
+using namespace std;
+
+template <class T>
+struct CBinTreeNode
+{
+    CBinTreeNode(T v)
+    {
+        value = v;
+        nodes[0] = nodes[1] = 0;
+        height = 1;
+    }
+    T value;
+    int height;
+    CBinTreeNode<T>* nodes[2];
+};
+
+template <class T>
+class CBinTree
+{
+public:
+    CBinTree();
+    CBinTreeNode<T>* Root();
+    ////////////////// AVL ALGORITTHM ///////////////////////////////
+    int calheight(struct CBinTreeNode<T>* p){
+
+        if(p->nodes[0] && p->nodes[1]){
+            if (p->nodes[0]->height < p->nodes[1]->height)
+                return p->nodes[1]->height + 1;
+            else return  p->nodes[0]->height + 1;
+        }
+        else if(p->nodes[0] && p->nodes[1] == NULL){
+            return p->nodes[0]->height + 1;
+        }
+        else if(p->nodes[0] ==NULL && p->nodes[1]){
+            return p->nodes[1]->height + 1;
+        }
+        return 0;
+    }
+
+    int bf(struct CBinTreeNode<T>* n){
+        if(n->nodes[0] && n->nodes[1]){
+            return n->nodes[0]->height - n->nodes[1]->height;
+        }
+        else if(n->nodes[0] && n->nodes[1] == NULL){
+            return n->nodes[0]->height;
+        }
+        else if(n->nodes[0]== NULL && n->nodes[1] ){
+            return -n->nodes[1]->height;
+        }
+    }
+
+    struct CBinTreeNode<T>* llrotation(struct CBinTreeNode<T>* n){
+        struct CBinTreeNode<T>*p;
+        struct CBinTreeNode<T>*tp;
+        p = n;
+        tp = p->nodes[0];
+        p->nodes[0] = tp->nodes[1];
+        tp->nodes[1] = p;
+        return tp;
+    }
+
+    struct CBinTreeNode<T>* rrrotation(struct CBinTreeNode<T>* n){
+        struct CBinTreeNode<T>*p;
+        struct CBinTreeNode<T>*tp;
+        p = n;
+        tp = p->nodes[1];
+        p->nodes[1] = tp->nodes[0];
+        tp->nodes[0] = p;
+        return tp;
+    }
+
+    struct CBinTreeNode<T>* rlrotation(struct CBinTreeNode<T>* n){
+        struct CBinTreeNode<T>*p;
+        struct CBinTreeNode<T>*tp;
+        struct CBinTreeNode<T>*tp2;
+        p = n;
+        tp = p->nodes[1];
+        tp2 =p->nodes[1]->nodes[0];
+
+        p -> nodes[1] = tp2->nodes[0];
+        tp ->nodes[0] = tp2->nodes[1];
+        tp2 ->nodes[0] = p;
+        tp2->nodes[1] = tp;
+
+        return tp2;
+    }
+
+    struct CBinTreeNode<T>* lrrotation(struct CBinTreeNode<T>* n){
+        struct CBinTreeNode<T>*p;
+        struct CBinTreeNode<T>*tp;
+        struct CBinTreeNode<T>*tp2;
+        p = n;
+        tp = p->nodes[0];
+        tp2 =p->nodes[0]->nodes[1];
+
+        p -> nodes[0] = tp2->nodes[1];
+        tp ->nodes[1] = tp2->nodes[0];
+        tp2 ->nodes[1] = p;
+        tp2->nodes[0] = tp;
+
+        return tp2;
+    }
+
+    struct CBinTreeNode<T>* insert(struct CBinTreeNode<T>*r,T data){
+
+        if(r==NULL){
+            struct CBinTreeNode<T>* n;
+            n = new struct CBinTreeNode<T>(data);
+            n->value = data;
+            r = n;
+            r->nodes[0] = r->nodes[1] = NULL;
+            r->height = 1;
+            return r;
+        }
+        else{
+            if(data < r->value)
+                r->nodes[0] = insert(r->nodes[0],data);
+            else
+                r->nodes[1] = insert(r->nodes[1],data);
+        }
+
+        r->height = calheight(r);
+
+        if(bf(r)==2 && bf(r->nodes[0])==1){
+            r = llrotation(r);
+        }
+        else if(bf(r)==-2 && bf(r->nodes[1])==-1){
+            r = rrrotation(r);
+        }
+        else if(bf(r)==-2 && bf(r->nodes[1])==1){
+            r = rlrotation(r);
+        }
+        else if(bf(r)==2 && bf(r->nodes[0])==-1){
+            r = lrrotation(r);
+        }
+        return r;
+    }
+    /////////////////////////////////////////////////////////////////
+    bool Find(T x, CBinTreeNode<T>**& p);
+    void Ins(T x);
+    bool Rem(T x);
+    CBinTreeNode<T>** Rep(CBinTreeNode<T>** p);
+    void InOrder(CBinTreeNode<T>* n);
+    void PreOrder(CBinTreeNode<T>* n);
+    void PosOrder(CBinTreeNode<T>* n);
+    void ReverseOrder(CBinTreeNode<T>* n);
+    void Print_arbol(CBinTreeNode<T>* n);
+    int num_nodos(CBinTreeNode<T>* n,int i);
+    void borrar_niveles(CBinTreeNode<T>* n,int cant);
+    void Podar(CBinTreeNode<T>* n);
+    int MaxDepth(CBinTreeNode<T>* n);
+    void Print();
+
+    CBinTreeNode<T>* root;
+
+private:
+    //    CBinTreeNode<T>* root;
+    bool brep;
+};
+
+template <class T>
+CBinTree<T>::CBinTree()
+{
+    root = 0;
+}
+
+template <class T>
+CBinTreeNode<T>* CBinTree<T>::Root()
+{
+    return root;
+}
+
+template <class T>
+bool CBinTree<T>::Find(T x, CBinTreeNode<T>**& p)
+{
+
+    for (   p = &root;*p && (*p)->value != x;p = &((*p)->nodes[ (*p)->value < x ]) );
+    return *p != 0;
+}
+
+template <class T>
+void CBinTree<T>::Ins(T x)
+{ /*
+    CBinTreeNode<T>** p;//Llamamos a nuestro enlace guardado de find
+    if ( Find(x,p) ) return 0;//Si se encontro tal elemento no hay q hacer nada y se retorna 0
+    //Al no encontrar el elemnto lo insertaremos como nuevo hijo
+    *p = new CBinTreeNode<T>(x);
+    return 1;*/
+    root = insert(root, x);
+}
+
+template <class T>
+bool CBinTree<T>::Rem(T x)
+{
+    CBinTreeNode<T>** p;//Lamamos a nuestro elemento encontrado y guardado
+    if ( !Find(x,p) ) return 0;//Si no lo encuentras no puedes remover nada retornas 0
+    if ( (*p)->nodes[0] && (*p)->nodes[1] )//Si el nodo a eliminar tiene hijos----CASO 2
+    {
+        CBinTreeNode<T>** q = Rep(p);
+        (*p)->value = (*q)->value;
+        p = q;
+    }
+
+    CBinTreeNode<T>* t = *p;
+    *p = (*p)->nodes[ (*p)->nodes[1] != 0 ];//pasamos el contenido de p es decir enlace hacia alguno de los dos hijos que existaaa (que de 1)
+    delete t;
+    return 1;
+}
+template <class T>
+CBinTreeNode<T>** CBinTree<T>::Rep(CBinTreeNode<T>** p)
+{
+
+    CBinTreeNode<T>** q;
+    for ( q = &(*p)->nodes[!brep];(*q)->nodes[brep];q = &(*q)->nodes[brep] );
+    brep = !brep;
+    return q;
+}
+
+
+template <class T>
+void CBinTree<T>::InOrder(CBinTreeNode<T>* n)
+{
+    if ( !n ) return;//Si no es nulo
+    InOrder(n->nodes[0]);//Llama nuevamente recursivamente primero hacia la izquiera
+    std::cout<<n->value<<" ";//hasta que de nulo e imprima el hijo
+    InOrder(n->nodes[1]);// si hay hijos a al derecha nuevamente se llama recursivamente
+}
+
+template <class T>
+void CBinTree<T>::PreOrder(CBinTreeNode<T>* n)
+{
+    if ( !n ) return;
+    std::cout<<n->value<<" ";
+    PreOrder(n->nodes[0]);
+    PreOrder(n->nodes[1]);
+}
+
+template <class T>
+void CBinTree<T>::PosOrder(CBinTreeNode<T>* n)
+{
+    if ( !n ) return;
+    PosOrder(n->nodes[0]);
+    PosOrder(n->nodes[1]);
+    std::cout<<n->value<<" ";
+}
+
+template <class T>
+void CBinTree<T>::ReverseOrder(CBinTreeNode<T>* n)
+{
+    if ( !n ) return;
+    ReverseOrder(n->nodes[1]);
+    std::cout<<n->value<<" ";
+    ReverseOrder(n->nodes[0]);
+}
+
+
+template <class T>
+void CBinTree<T>::Print_arbol(CBinTreeNode<T>* n)
+{
+    if ( !root ) return;
+    int profundidad=MaxDepth(root);
+    CBinTreeNode<T>* t=new CBinTreeNode<T>(-1);
+    queue< CBinTreeNode<T>* > q;
+    queue< CBinTreeNode<T>* > p;
+    q.push(root);
+    int space_1=pow(2, profundidad);//55
+    int i=2;
+    for(int i=0;i<profundidad;i++){
+        while(!q.empty()){
+            if(q.front()->value==-1){
+                cout<<string(space_1, ' ')<<"-"<<string(space_1-1, ' ');
+            }
+            else{
+                cout<<string(space_1, ' ')<<q.front()->value<<string(space_1-1, ' ');
+            }
+            if ( q.front()->nodes[0] ) p.push( q.front()->nodes[0] );if ( !q.front()->nodes[0] ) p.push(t);
+            if ( q.front()->nodes[1] ) p.push( q.front()->nodes[1] );if ( !q.front()->nodes[1] ) p.push(t);
+            q.pop();
+        }
+        space_1=space_1/2;
+        i++;
+        if(i>profundidad)break;
+        cout<<endl;
+        while (!p.empty())
+        {
+            if(p.front()->value==-1){
+                std::cout<<string(space_1, ' ')<<"-"<<string(space_1-1, ' ');
+            }
+            else{
+                std::cout<<string(space_1, ' ')<<p.front()->value<<string(space_1-1, ' ');
+            }
+            if ( p.front()->nodes[0] ) q.push( p.front()->nodes[0] );if ( !p.front()->nodes[0] ) q.push(t);
+            if ( p.front()->nodes[1] ) q.push( p.front()->nodes[1] );if ( !p.front()->nodes[1] ) q.push(t);
+            p.pop();
+        }
+        space_1=space_1/2;
+        cout<<endl;
+
+    }
+}
+
+template <class T>
+int CBinTree<T>::num_nodos(CBinTreeNode<T>* n,int aux){
+    int cant=0;
+    queue< CBinTreeNode<T>* > q;
+    queue< CBinTreeNode<T>* > p;
+    q.push(root);
+    for(int i=0;i<=aux;i++){
+        cant=0;
+        while(!q.empty()){
+            cant++;
+            if ( q.front()->nodes[0] ) p.push( q.front()->nodes[0] );
+            if ( q.front()->nodes[1] ) p.push( q.front()->nodes[1] );
+            q.pop();
+        }
+        i++;
+        if(i>aux)break;
+        cant=0;
+        while (!p.empty())
+        {
+            cant++;
+            if ( p.front()->nodes[0] ) q.push( p.front()->nodes[0] );
+            if ( p.front()->nodes[1] ) q.push( p.front()->nodes[1] );
+            p.pop();
+        }
+    }
+    //cout<<endl<<"Cantidad:"<<cant<<endl;
+    return cant;
+}
+
+template <class T>
+void CBinTree<T>::borrar_niveles(CBinTreeNode<T>* n,int cant){
+    if(!n)return;
+    if(cant==0)  n=reinterpret_cast<CBinTreeNode<int>*>(Rem(n->value));
+    else if(cant>0){
+        borrar_niveles(n->nodes[0],cant-1);
+        borrar_niveles(n->nodes[1],cant-1);
+    }
+}
+
+template <class T>
+void CBinTree<T>::Podar(CBinTreeNode<T>* n){
+    int profundidad= MaxDepth(root)-1;//4
+    for(int i=profundidad;i>=0;i--){
+        int necessary=pow(2,i);
+        int cant=num_nodos(n,i);
+        if(cant!=necessary){
+            borrar_niveles(n,i);
+        }
+    }
+    cout<<endl<<"El arbol ya ha sido podado"<<endl;
+}
+
+
+template <class T>
+int CBinTree<T>::MaxDepth(CBinTreeNode<T>* n)
+{
+    if ( !n ) return 0;
+    return std::max(MaxDepth(n->nodes[0]), MaxDepth(n->nodes[1])) + 1;
+}
+
+template <class T>
+void CBinTree<T>::Print()
+{
+    InOrder(root);
+    std::cout<<"\n";
+}
+int main()
+{
+    CBinTree<int> t;
+    t.Ins(50);
+    t.Ins(40);
+    t.Ins(80);
+    t.Ins(30);
+    t.Ins(43);
+    t.Ins(60);
+    t.Ins(95);
+    t.Ins(20);
+    t.Ins(35);
+    t.Ins(73);
+    t.Ins(90);
+    t.Ins(99);
+    t.Ins(10);
+    t.Ins(28);
+    t.Ins(70);
+
+    t.Print_arbol(t.root);     std::cout<<"\n";
+    //t.Podar(t.Root());
+    //t.Print_arbol(t.Root());     std::cout<<"\n";
+}

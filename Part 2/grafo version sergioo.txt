@@ -1,0 +1,183 @@
+#include <iostream>
+#include <queue>
+#include <vector>
+#include <list>
+#include <thread>
+#include <mutex>
+
+#define MAXV 100 // Maxima cantidad de vertices.
+#define oo 0x3f3f3f3f // Valor infinito.
+using namespace std;
+mutex m;
+
+struct Edge
+{
+    int node; // El nodo destino
+    int cost; 
+    Edge(int _node, int _cost) : node(_node), cost(_cost) {} 
+    Edge() : node(-1), cost(-1) {} // Constructor por defecto.
+};
+
+struct Graph
+{
+    vector<Edge> G[MAXV]; // Lista de adyacencias.
+    int V; // N° vertices.
+    int E; // N° aristas.
+};
+
+struct State
+{
+    int node; // Nodo actual.
+    int cost; // Costo.
+    State(int _node, int _cost) : node(_node), cost(_cost) {}
+
+    bool operator <(const State &b) const 
+    {
+        return cost > b.cost;
+    }
+};
+
+list <int> algoritmo(const int begin, const int end, const Graph graph, int & peso)
+{
+    priority_queue<State> pq;
+    list <int> camino;
+
+    vector<int> Dist(graph.V, oo); // La distancia inicialmente es infinito.
+    vector<bool> mark(graph.V, false); 
+
+    Dist[begin] = 0; 
+    pq.push(State(begin, 0)); 
+
+    int res_costo = -1;
+    int contador = 0 ;
+    while(!pq.empty()) 
+    {
+        State st = pq.top();
+
+        pq.pop(); 
+        mark[st.node] = true; 
+        if (st.node == end)
+        {
+            camino.push_back(st.node+1);
+  
+            res_costo = st.cost; 
+            break;
+        }
+
+        int elegido=0;
+        int T = (int)graph.G[st.node].size();
+        for(int i = 0; i < T; ++i) 
+        {
+            if (!mark[graph.G[st.node][i].node] && ((Dist[st.node] + graph.G[st.node][i].cost) < Dist[graph.G[st.node][i].node]))
+            {
+                Dist[graph.G[st.node][i].node] = st.cost + graph.G[st.node][i].cost;
+                pq.push(State(graph.G[st.node][i].node, st.cost + graph.G[st.node][i].cost));
+                elegido   = st.node+1;
+                
+            }
+        }
+
+        if(elegido!=0)
+        {
+          camino.push_back(elegido);
+        }
+
+    }
+    cout<< res_costo ;
+    peso = res_costo;
+   
+
+    return camino; 
+}
+
+void print(int i, int j, Graph graph, list <int> &respuesta, int& peso )
+{
+    //m.lock();
+    cout << i<< "\t\t|\t\t"<< j <<"\t\t|\t\t";
+    int pesito = 0;
+    list <int> res = algoritmo(i-1, j-1, graph, pesito);
+    cout <<"\t\t|";
+    if(res.size()!=1)
+    {
+      list<int>::iterator it=res.begin();
+      while( it !=  res.end())
+      {
+          cout << "\t" << *it << "->"; it++;
+      }
+    }
+    else
+    {
+      cout << "\t" <<"null";
+    }
+      cout<<endl;
+    respuesta =  res;
+    peso = pesito;
+    ///m.unlock();
+}
+
+int main()
+{
+    Graph graph;
+    cout << "GRAFO: -------------------------------------------------" << endl;
+
+    graph.V = 5;
+    graph.E = 8;
+    graph.G[0].push_back(Edge(1, 2));
+    graph.G[1].push_back(Edge(2, 3));
+    graph.G[2].push_back(Edge(3, 4));
+    graph.G[3].push_back(Edge(4, 5));
+    graph.G[4].push_back(Edge(2, 3));
+    graph.G[2].push_back(Edge(0, 4));
+    graph.G[0].push_back(Edge(4, 10));
+    graph.G[1].push_back(Edge(4, 7));
+
+    cout << "Dikstra usando threads:" << endl;
+    cout << "Origen \t|\t Destino \t|\t Peso \t\t|\t Camino" << endl;
+    cout << "--------------------------------------------------------" << endl;
+    int i = 0, nt = thread::hardware_concurrency();
+    int contador = 0;
+    int peso = 0;
+    list <int> respuesta;
+    vector<vector<int>> Matriz;
+    int k = 0;
+    vector<list<int>> Matrizcamino;
+
+    for(int i=1 ; i < 6; i++)
+    {
+      for(int j = 1 ; j < 6 ; j++)
+      {
+          thread ths(print, i, j, graph, ref(respuesta), ref(peso));
+          
+          ths.join();
+					vector<int> tmp;
+          tmp.push_back(i);
+          tmp.push_back(j);
+          tmp.push_back(peso);
+					Matriz.push_back(tmp);
+          k++;
+          Matrizcamino.push_back(respuesta);
+         
+      }
+      cout<<endl;
+    }
+    int Origen, Destino;
+		cout << "Ingrese Origen: " << endl;
+		cin >> Origen;
+		cout << "Ingrese Destino: " << endl;
+		cin >> Destino;
+    cout<<endl;
+    cout<<endl;
+  for(int i=0 ; i < k; i++)
+	{
+			if(Matriz[i][0] == Origen && Matriz[i][1] == Destino)
+			{
+				cout << Origen << "\t\t|\t\t"<< Destino <<"\t\t|\t\t" <<  Matriz[i][2] << "\t\t|\t";
+				for(auto j = Matrizcamino[i].begin(); j != Matrizcamino[i].end(); j++){
+					cout << *j << " -> ";
+				}
+			}
+		
+	}
+
+		return 0;
+}

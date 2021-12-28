@@ -1,0 +1,50 @@
+#include <iostream>
+#include <cctype>
+#include <random>
+
+using u32    = uint_least32_t; 
+using engine = std::mt19937;
+
+#include <chrono>
+#include <sys/time.h>
+#include <ctime>
+using std::chrono::duration_cast;
+using std::chrono::milliseconds;
+using std::chrono::system_clock;
+
+using namespace std; 
+
+int aleatorio()
+{
+  int x; 
+  std::random_device os_seed;
+  const u32 seed = os_seed();
+
+  engine generator( seed );
+  std::uniform_int_distribution< u32 > distribute( 1, 6 );
+
+  x = distribute( generator ); 
+  cout << "the number random is: " << x << endl; 
+  return x; 
+}
+int newTime(){
+        int x;
+        auto begin = std::chrono::high_resolution_clock::now();
+        auto end = std::chrono::high_resolution_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
+        x = elapsed.count()* 1e-1;
+        cout << endl <<"Musica: "<< x << endl;
+        return x;
+}
+
+int main(){
+  ///aleatorios
+  cout << aleatorio() << endl; 
+  cout << aleatorio() << endl; 
+  cout << aleatorio() << endl; 
+
+  ///newTime
+  cout << newTime() << endl; 
+  cout << newTime() << endl; 
+  cout << newTime() << endl; 
+}

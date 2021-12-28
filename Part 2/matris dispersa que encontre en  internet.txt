@@ -1,0 +1,124 @@
+#include <iostream>
+#include <map>
+#include <cassert>
+#include <stdexcept>
+#include <iomanip>
+#include <vector>
+
+using namespace std;
+
+template <typename element_type>
+class SparseMatrix {
+
+public:
+    template<class T>
+    friend SparseMatrix<T> operator+(const SparseMatrix<T>& m1 , const SparseMatrix<T>& m2 );
+
+    template<class T>
+    friend SparseMatrix<T> operator-(const SparseMatrix<T>& m1 , const SparseMatrix<T>& m2 );
+
+
+
+public:
+    // container type ;  
+    using data_type = std::vector<std::map<std::size_t , element_type >> ;
+    using it_rows   = typename std::map<std::size_t , element_type>::iterator ;
+
+    SparseMatrix(std::size_t rows , std::size_t cols) : rows{rows} , columns{cols}
+    {
+        data.resize(rows);
+    }
+
+    SparseMatrix(std::initializer_list<std::initializer_list<element_type>> l );
+    SparseMatrix(const std::string );
+
+    auto insert(std::size_t i , std::pair<std::size_t, element_type> p )
+    {
+        assert( i < rows && p.first < columns); // , "Index out of bound" );
+        data.at(i).insert(p);
+    }
+
+    auto insert(std::size_t i, std::size_t j, element_type val)
+    {
+        assert(i<rows && j <columns);
+        data.at(i)[j] = val ;
+    }
+
+    auto identity() noexcept ;
+    auto diag(const element_type& v) noexcept ;
+    auto print() const noexcept ;
+    auto dataType() const noexcept ;
+    auto traspose() noexcept ;
+
+private:
+    std::size_t rows    ;
+    std::size_t columns ;
+    data_type data    ;     // vector containing row element
+};
+
+template <typename T>
+auto SparseMatrix<T>::traspose() noexcept
+{
+    //rows = columns ;
+    std::swap(rows,columns);
+    data_type newData ;
+    newData.resize(rows);
+
+    for(std::size_t i=0; i < columns ; i++)
+        for(std::size_t j=0 ; j < rows ; j++)
+            if(data.at(i).find(j) != data.at(i).end())
+                newData.at(j)[i] = data.at(i).at(j) ;
+
+    std::swap(data,newData);
+}
+
+template < typename T, T nothing = T{} > struct sparse_matrix
+{
+    std::size_t nrows ;
+    std::size_t ncols ;
+    std::map< std::size_t, std::map<std::size_t,T> > data ;
+
+    sparse_matrix( std::size_t nrows, std::size_t ncols ) : nrows(nrows), ncols(ncols) {}
+
+    T operator() ( std::size_t row, std::size_t col ) const
+    {
+        const auto row_iter = data.find(row) ;
+        if( row_iter != data.end() )
+        {
+            const auto col_iter = row_iter->second.find(col) ;
+            return col_iter != row_iter->second.end() ? col_iter->second : nothing ;
+        }
+        else return nothing ;
+    }
+
+    T& insert_or_update( std::size_t row, std::size_t col, const T& value )
+    {
+        assert( row < nrows && col < ncols ) ;
+        if( row < nrows && col < ncols ) return data[row][col] = value ;
+        else throw std::out_of_range( "sparse_matrix: row/col is out of range" ) ;
+    }
+
+    std::ostream& print( std::ostream& stm = std::cout ) const
+    {
+        for( std::size_t row = 0 ; row < nrows ; ++row )
+        {
+            for( std::size_t col = 0 ; col < ncols ; ++col )
+                stm << std::setw(5) << operator()(row,col) ;
+            stm << '\n' ;
+        }
+        return stm ;
+    }
+};
+
+int main()
+{
+    sparse_matrix<int> mtx( 4, 4 ) ;
+
+    //for( std::size_t row = 1 ; row < mtx.nrows ; row += 3 )
+        //for( std::size_t col = 0 ; col < mtx.ncols ; col += 2 )
+            mtx.insert_or_update( 0, 0,1 ) ;
+
+    mtx.print() ;
+    cout << "\n\n";
+
+}
